@@ -65,7 +65,7 @@
         // Check if any method is not visible. If so, expand all methods.
         if (methodFormsLength > 0) {
             var methodLists = $('ul.methods:not(:visible)'), // Any hidden methods
-            methodListsLength = methodLists.length;
+                methodListsLength = methodLists.length;
 
             // First make sure all the hidden endpoints are expanded.
             for (var x = 0; x < methodListsLength; x++) {
@@ -163,8 +163,8 @@
     });
 
     /*
-        Try it! button. Submits the method params, apikey and secret if any, and apiName
-    */
+     Try it! button. Submits the method params, apikey and secret if any, and apiName
+     */
     $('li.method form').submit(function(event) {
         var self = this;
 
@@ -203,6 +203,21 @@
                 })
                 .insertAfter($('input[type=submit]', self));
 
+            // We want to display the request Body passed to the service if a POST or PUT
+            // operation was executed. -- examine our parameters to find the http method
+            // assume a GET until we learn otherwise.
+            var httpMethod='GET';
+            for ( var i = 0 ; i < params.length ; i++ ) {
+                var nv = params[i];
+                if (nv.name == 'httpMethod') {
+                    httpMethod = nv.value;
+                }
+            }
+            if ( httpMethod == 'POST' || httpMethod == 'PUT') {
+                resultContainer.append($(document.createElement('h4')).text('Request Body'));
+                resultContainer.append($(document.createElement('pre')).addClass('body prettyprint'));
+            }
+
             // Call that was made, add pre elements
             resultContainer.append($(document.createElement('h4')).text('Call'));
             resultContainer.append($(document.createElement('pre')).addClass('call'));
@@ -219,14 +234,14 @@
             resultContainer.append($(document.createElement('h4'))
                 .text('Response Body')
                 .append($(document.createElement('a'))
-                    .text('Select body')
-                    .addClass('select-all')
-                    .attr('href', '#')
-                    .click(function(e) {
-                        e.preventDefault();
-                        selectElementText($(this.parentNode).siblings('.response')[0]);
-                    })
-                )
+                .text('Select body')
+                .addClass('select-all')
+                .attr('href', '#')
+                .click(function(e) {
+                    e.preventDefault();
+                    selectElementText($(this.parentNode).siblings('.response')[0]);
+                })
+            )
             );
 
             resultContainer.append($(document.createElement('pre'))
@@ -240,10 +255,22 @@
             if (result.signin) {
                 window.open(result.signin,"_blank","height=900,width=800,menubar=0,resizable=1,scrollbars=1,status=0,titlebar=0,toolbar=0");
             } else {
+                // make sure we can display something even if we got no response text passed back to us.
+                var ct='text/plain';
+                if (result && result.headers['content-type']) {
+                    ct=result.headers['content-type'];
+                }
                 var response,
-                    responseContentType = result.headers['content-type'];
+                    responseContentType = ct;
+
                 // Format output according to content-type
-                response = livedocs.formatData(result.response, result.headers['content-type'])
+                if (result && result.headers['content-type']) {
+                    response = livedocs.formatData(result.response, ct);
+                }
+                else {
+                    // if there is no content, by all means say so!
+                    response = 'No Content';
+                }
 
                 $('pre.response', resultContainer)
                     .toggleClass('error', false)
@@ -251,50 +278,79 @@
             }
 
         })
-        // Complete, runs on error and success
-        .complete(function(result, text) {
-            var response = JSON.parse(result.responseText);
+            // Complete, runs on error and success
+            .complete(function(result, text) {
 
-            if (response.call) {
-                $('pre.call', resultContainer)
-                    .text(response.call);
-            }
-
-            if (response.code) {
-                $('pre.code', resultContainer)
-                    .text(response.code);
-            }
-
-            if (response.headers) {
-                $('pre.headers', resultContainer)
-                    .text(formatJSON(response.headers));
-            }
-
-            // Syntax highlighting
-            prettyPrint();
-        })
-        .error(function(err, text) {
-            var response;
-
-            if (err.responseText !== '') {
-                var result = JSON.parse(err.responseText),
-                    headers = formatJSON(result.headers);
-
-                if (result.headers && result.headers['content-type']) {
-                    // Format the result.response and assign it to response
-                    response = livedocs.formatData(result.response, result.headers['content-type']);
-                } else {
-                    response = result.response;
+                // make sure the response it set to something
+                // if there was no response, perhaps something bad happened?
+                var response = JSON.parse('{"code":"500"}');
+                if (result && result.responseText) {
+                    response = JSON.parse(result.responseText);
+                }
+                else if (result && result.status) {
+                    // no response text? well at least grab the status
+                    response.code = JSON.parse(result.status);
                 }
 
-            } else {
-                response = 'Error';
-            }
+                if (response.call) {
+                    $('pre.call', resultContainer)
+                        .text(response.call);
+                }
 
-            $('pre.response', resultContainer)
-                .toggleClass('error', true)
-                .text(response);
-        })
+                if (response.code) {
+                    $('pre.code', resultContainer)
+                        .text(response.code);
+                }
+
+                if (response.headers) {
+                    $('pre.headers', resultContainer)
+                        .text(formatJSON(response.headers));
+                }
+
+                // if we did a POST or PUT, we may have sent along the request body and
+                // content type -- if so, format the body and embed in the result container.
+                if ( httpMethod == 'POST' || httpMethod == 'PUT') {
+                    var rawpayloadText='Request Body Not Found';
+                    if (response.requestBody) {
+                        rawpayloadText=response.requestBody;
+                    }
+
+                    // json encoding is fairly safe if nothing was sent
+                    var requestContentType='application/json';
+                    if (response.requestBodyContentType) {
+                        requestContentType=response.requestBodyContentType;
+                    }
+
+                    var requestBodyText = livedocs.formatData(rawpayloadText, requestContentType);
+                    $('pre.body', resultContainer).text(requestBodyText);
+                }
+
+
+                // Syntax highlighting
+                prettyPrint();
+            })
+            .error(function(err, text) {
+                var response;
+
+                if (err.responseText !== '') {
+                    var result = JSON.parse(err.responseText),
+                        headers = formatJSON(result.headers);
+
+                    if (result.headers && result.headers['content-type']) {
+                        // Format the result.response and assign it to response
+                        response = livedocs.formatData(result.response, result.headers['content-type']);
+                    } else {
+                        response = result.response;
+                    }
+
+                } else {
+                    response = 'Error';
+                }
+
+                $('pre.response', resultContainer)
+                    .toggleClass('error', true)
+                    .text(response);
+            })
     })
 
 })();

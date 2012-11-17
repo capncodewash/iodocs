@@ -62,7 +62,7 @@ if (process.env.REDISTOGO_URL) {
 
 db.on("error", function(err) {
     if (config.debug) {
-         console.log("Error " + err);
+        console.log("Error " + err);
     }
 });
 
@@ -70,11 +70,11 @@ db.on("error", function(err) {
 // Load API Configs
 //
 var apisConfig;
-fs.readFile(__dirname +'/public/data/apiconfig.json', 'utf-8', function(err, data) {
+fs.readFile('public/data/apiconfig.json', 'utf-8', function(err, data) {
     if (err) throw err;
     apisConfig = JSON.parse(data);
     if (config.debug) {
-         console.log(util.inspect(apisConfig));
+        console.log(util.inspect(apisConfig));
     }
 });
 
@@ -131,12 +131,12 @@ function oauth(req, res, next) {
             refererURL = url.parse(req.headers.referer),
             callbackURL = refererURL.protocol + '//' + refererURL.host + '/authSuccess/' + apiName,
             oa = new OAuth(apiConfig.oauth.requestURL,
-                           apiConfig.oauth.accessURL,
-                           apiKey,
-                           apiSecret,
-                           apiConfig.oauth.version,
-                           callbackURL,
-                           apiConfig.oauth.crypt);
+                apiConfig.oauth.accessURL,
+                apiKey,
+                apiSecret,
+                apiConfig.oauth.version,
+                callbackURL,
+                apiConfig.oauth.crypt);
 
         if (config.debug) {
             console.log('OAuth type: ' + apiConfig.oauth.type);
@@ -221,9 +221,9 @@ function oauthSuccess(req, res, next) {
             console.log(util.inspect(err));
         }
         oauthRequestToken = result[0],
-        oauthRequestTokenSecret = result[1],
-        apiKey = result[2],
-        apiSecret = result[3];
+            oauthRequestTokenSecret = result[1],
+            apiKey = result[2],
+            apiSecret = result[3];
 
         if (config.debug) {
             console.log(util.inspect(">>"+oauthRequestToken));
@@ -232,12 +232,12 @@ function oauthSuccess(req, res, next) {
         };
 
         var oa = new OAuth(apiConfig.oauth.requestURL,
-                           apiConfig.oauth.accessURL,
-                           apiKey,
-                           apiSecret,
-                           apiConfig.oauth.version,
-                           null,
-                           apiConfig.oauth.crypt);
+            apiConfig.oauth.accessURL,
+            apiKey,
+            apiSecret,
+            apiConfig.oauth.version,
+            null,
+            apiConfig.oauth.crypt);
 
         if (config.debug) {
             console.log(util.inspect(oa));
@@ -276,13 +276,14 @@ function processRequest(req, res, next) {
     };
 
     var reqQuery = req.body,
+        requestBody = reqQuery.rawpayload || '',
         params = reqQuery.params || {},
         methodURL = reqQuery.methodUri,
         httpMethod = reqQuery.httpMethod,
         apiKey = reqQuery.apiKey,
         apiSecret = reqQuery.apiSecret,
         apiName = reqQuery.apiName
-        apiConfig = apisConfig[apiName],
+    apiConfig = apisConfig[apiName],
         key = req.sessionID + ':' + apiName;
 
     // Replace placeholders in the methodURL with matching params
@@ -310,7 +311,7 @@ function processRequest(req, res, next) {
     var paramString = query.stringify(params),
         privateReqURL = apiConfig.protocol + '://' + apiConfig.baseURL + apiConfig.privatePath + methodURL + ((paramString.length > 0) ? '?' + paramString : ""),
         options = {
-            headers: apiConfig.headers,
+            headers: {},
             protocol: apiConfig.protocol + ':',
             host: baseHostUrl,
             port: baseHostPort,
@@ -318,8 +319,51 @@ function processRequest(req, res, next) {
             path: apiConfig.publicPath + methodURL// + ((paramString.length > 0) ? '?' + paramString : "")
         };
 
+    // build the request body if it was not passed in as 'rawpayload'
     if (['POST','DELETE','PUT'].indexOf(httpMethod) !== -1) {
-        var requestBody = query.stringify(params);
+        if (!requestBody) {
+
+            // if passed in a series of elements to use to build a request body,
+            // build it here based on the content type we need to send
+            if (reqQuery.elementNames && reqQuery.elementNames.length > 0) {
+                // consult our header values to find our content type
+                var bodyContentType = 'application/json';
+                if (reqQuery.headerNames && reqQuery.headerNames.length > 0) {
+                    for (var x = 0, len = reqQuery.headerNames.length; x < len; x++) {
+                        if (reqQuery.headerNames[x] == 'Content-Type') {
+                            bodyContentType = reqQuery.headerValues[x];
+                        }
+                    }
+                }
+
+                if ( bodyContentType == 'application/xml') {
+                    // we think we want XML -- need to find a way to get a real xml 
+                    // builder in here?!
+                    requestBody += '<'+reqQuery.parentElement+'>';
+                    for (var x = 0, len = reqQuery.elementNames.length; x < len; x++) {
+                        if (reqQuery.elementNames[x] != '') {
+                            requestBody += '<' + reqQuery.elementNames[x] + '>';
+                            requestBody += reqQuery.elementValues[x];
+                            requestBody += '</' + reqQuery.elementNames[x] + '>';
+                        }
+                    }
+                    requestBody += '</'+reqQuery.parentElement+'>';
+                }
+                else {
+                    // we think we want JSON - at least this is easy to build
+                    var elList = {};
+                    for (var x = 0, len = reqQuery.elementNames.length; x < len; x++) {
+                        if (reqQuery.elementNames[x] != '') {
+                            elList[reqQuery.elementNames[x]] = reqQuery.elementValues[x];
+                        }
+                    }
+                    requestBody = JSON.stringify(elList);
+                }
+            } else {
+                // by default, we build a bunch of parameters
+                requestBody = query.stringify(params);
+            }
+        }
     }
 
     if (apiConfig.oauth) {
@@ -332,10 +376,10 @@ function processRequest(req, res, next) {
             };
 
             db.mget([key + ':apiKey',
-                     key + ':apiSecret',
-                     key + ':accessToken',
-                     key + ':accessTokenSecret'
-                ],
+                key + ':apiSecret',
+                key + ':accessToken',
+                key + ':accessTokenSecret'
+            ],
                 function(err, results) {
 
                     var apiKey = (typeof reqQuery.apiKey == "undefined" || reqQuery.apiKey == "undefined")?results[0]:reqQuery.apiKey,
@@ -346,14 +390,14 @@ function processRequest(req, res, next) {
                     console.log(apiSecret);
                     console.log(accessToken);
                     console.log(accessTokenSecret);
-                    
+
                     var oa = new OAuth(apiConfig.oauth.requestURL || null,
-                                       apiConfig.oauth.accessURL || null,
-                                       apiKey || null,
-                                       apiSecret || null,
-                                       apiConfig.oauth.version || null,
-                                       null,
-                                       apiConfig.oauth.crypt);
+                        apiConfig.oauth.accessURL || null,
+                        apiKey || null,
+                        apiSecret || null,
+                        apiConfig.oauth.version || null,
+                        null,
+                        apiConfig.oauth.crypt);
 
                     if (config.debug) {
                         console.log('Access token: ' + accessToken);
@@ -393,12 +437,12 @@ function processRequest(req, res, next) {
 
             var body,
                 oa = new OAuth(null,
-                               null,
-                               apiKey || null,
-                               apiSecret || null,
-                               apiConfig.oauth.version || null,
-                               null,
-                               apiConfig.oauth.crypt);
+                    null,
+                    apiKey || null,
+                    apiSecret || null,
+                    apiConfig.oauth.version || null,
+                    null,
+                    apiConfig.oauth.crypt);
 
             var resource = options.protocol + '://' + options.host + options.path,
                 cb = function(error, data, response) {
@@ -512,7 +556,7 @@ function processRequest(req, res, next) {
 
             for (var x = 0, len = reqQuery.headerNames.length; x < len; x++) {
                 if (config.debug) {
-                  console.log('Setting header: ' + reqQuery.headerNames[x] + ':' + reqQuery.headerValues[x]);
+                    console.log('Setting header: ' + reqQuery.headerNames[x] + ':' + reqQuery.headerValues[x]);
                 };
                 if (reqQuery.headerNames[x] != '') {
                     headers[reqQuery.headerNames[x]] = reqQuery.headerValues[x];
@@ -521,9 +565,7 @@ function processRequest(req, res, next) {
 
             options.headers = headers;
         }
-        if(options.headers === void 0){
-            options.headers = {}
-        }
+
         if (!options.headers['Content-Length']) {
             if (requestBody) {
                 options.headers['Content-Length'] = requestBody.length;
@@ -533,13 +575,29 @@ function processRequest(req, res, next) {
             }
         }
 
-        if (!options.headers['Content-Type'] && requestBody) {
-            options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        if (requestBody) {
+            if (options.headers['Content-Type']) {
+                if (config.debug) {
+                    console.log('Header: Content-Type already set to: ' + options.headers['Content-Type']);
+                }
+            }
+            else {
+                if (config.debug) {
+                    console.log('Setting header: Content-Type = application/x-www-form-urlencoded ');
+                }
+                options.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+            }
+            // embed our requestBody and the content type 
+            // into the 'req' structure to pass along as part of the 
+            // result in the app.post operation
+            req.body.requestBody=requestBody;
+            req.body.requestBodyContentType=options.headers['Content-Type'];
         }
 
         if (config.debug) {
+            console.log('req.body ' + JSON.stringify(req.body));
             console.log(util.inspect(options));
-        };
+        }
 
         var doRequest;
         if (options.protocol === 'https' || options.protocol === 'https:') {
@@ -586,23 +644,29 @@ function processRequest(req, res, next) {
 
                 // Set Headers and Call
                 req.resultHeaders = response.headers;
-                req.call = url.parse(options.host + options.path);
+
+                var portPart='';
+                if (options.port) {
+                    portPart +=':'+options.port;
+                }
+                req.call = url.parse(options.host + portPart + options.path);
+
                 req.call = url.format(req.call);
 
                 // Response body
                 req.result = body;
 
-                console.log(util.inspect(body));
+                sconsole.log(util.inspect(body));
 
                 next();
             })
         }).on('error', function(e) {
-            if (config.debug) {
-                console.log('HEADERS: ' + JSON.stringify(res.headers));
-                console.log("Got error: " + e.message);
-                console.log("Error: " + util.inspect(e));
-            };
-        });
+                if (config.debug) {
+                    console.log('HEADERS: ' + JSON.stringify(res.headers));
+                    console.log("Got error: " + e.message);
+                    console.log("Error: " + util.inspect(e));
+                };
+            });
 
         if (requestBody) {
             apiCall.end(requestBody, 'utf-8');
@@ -618,16 +682,16 @@ function processRequest(req, res, next) {
 // Passes variables to the view
 app.dynamicHelpers({
     session: function(req, res) {
-    // If api wasn't passed in as a parameter, check the path to see if it's there
+        // If api wasn't passed in as a parameter, check the path to see if it's there
         if (!req.params.api) {
             pathName = req.url.replace('/','');
             // Is it a valid API - if there's a config file we can assume so
-            fs.stat(__dirname + '/public/data/' + pathName + '.json', function (error, stats) {
+            fs.stat('public/data/' + pathName + '.json', function (error, stats) {
                 if (stats) {
                     req.params.api = pathName;
                 }
             });
-        }       
+        }
         // If the cookie says we're authed for this particular API, set the session to authed as well
         if (req.params.api && req.session[req.params.api] && req.session[req.params.api]['authed']) {
             req.session['authed'] = true;
@@ -649,7 +713,7 @@ app.dynamicHelpers({
     },
     apiDefinition: function(req, res) {
         if (req.params.api) {
-            var data = fs.readFileSync(__dirname + '/public/data/' + req.params.api + '.json');
+            var data = fs.readFileSync('public/data/' + req.params.api + '.json');
             return JSON.parse(data);
         }
     }
@@ -667,13 +731,31 @@ app.get('/', function(req, res) {
 
 // Process the API request
 app.post('/processReq', oauth, processRequest, function(req, res) {
+    // embed data into the 'result' that is processed and used 
+    // for display -- include the requestBody and the 
+    // content type so that we can display what we want on 
+    // the result page.
+
     var result = {
         headers: req.resultHeaders,
         response: req.result,
         call: req.call,
-        code: req.res.statusCode
+        code: req.res.statusCode,
+        requestBody: req.body.requestBody,
+        requestBodyContentType: req.body.requestBodyContentType
     };
 
+    // this is insane... but.. hmmm -- we want to send back all that 
+    // information we have in the result. but on a 204 or 304 we have no
+    // content to send.. In normal operations, this effectively also stops
+    // the sending of result data since no response body is present.  
+    // In such a case, we can try and short circuit the issue
+    // by resetting the res.statusCode to something else, and allowing the content
+    // in the result to be passed to the view. Remember, we have stashed
+    // the acutal response code as 'code' in the result structure.
+    if (res.statusCode == 204) {
+        res.statusCode = 200;
+    }
     res.send(result);
 });
 
@@ -688,13 +770,12 @@ app.get('/authSuccess/:api', oauthSuccess, function(req, res) {
 });
 
 app.post('/upload', function(req, res) {
-  console.log(req.body.user);
-  res.redirect('back');
+    console.log(req.body.user);
+    res.redirect('back');
 });
 
 // API shortname, all lowercase
 app.get('/:api([^\.]+)', function(req, res) {
-    req.params.api=req.params.api.replace(/\/$/,'');
     res.render('api');
 });
 
