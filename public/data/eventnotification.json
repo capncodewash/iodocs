@@ -1,0 +1,410 @@
+{
+    "endpoints": [
+        {
+            "name": "EventNotifications",
+            "methods": [
+                {
+                    	"MethodName": "GetEvent",
+                    	"Synopsis": "Returns EventNotice Resource",
+                    	"HTTPMethod": "GET",
+                    	"URI": "/eventNotice/event/:eventId/meter/:meterId",
+                    	"RequiresOAuth": "N",
+		    	"read-only":false,
+		     	"parameters":[ 
+			{
+                     		"Name":"eventId",
+                     		"Required":"Y",
+                     		"Default":"1234",
+                     		"Type":"string",
+                     		"Description":"Probably numeric third party identifier for an event"
+                        },
+			{
+				"Name":"meterId",
+				"Required":"Y",
+                     		"Default":"5678",
+				"Type":"string",
+				"Description":"Probably numeric third party identifier for a specific meter"
+			} 
+			],
+			"headers": [ 
+			{ 
+				"Name":"Accept",
+				"Required":"N",
+				"Default":"application/json",
+				"Type":"enumerated",
+				"Description":"response mime type",
+				"EnumeratedList":[
+					"application/json",
+					"application/xml"
+				]
+			}
+			]
+                },
+		{
+               		"MethodName":"CreateEvent",
+               		"Synopsis":"Create an EventNotice Resource.",
+               		"HTTPMethod":"POST",
+               		"URI":"/eventNotice/",
+               		"RequiresOAuth":"N",
+               		"read-only":false,
+			"headers": [ 
+			{ 
+				"Name":"Accept",
+				"Required":"Y",
+				"Default":"application/json",
+				"Type":"enumerated",
+				"Description":"response mime type",
+				"EnumeratedList":[
+					"application/json",
+					"application/xml"
+				]
+			},
+			{ 
+				"Name":"Content-Type",
+				"Required":"Y",
+				"Default":"application/json",
+				"Type":"enumerated",
+				"Description":"request mime type",
+				"EnumeratedList":[
+					"application/json",
+					"application/xml"
+				]
+			}
+			],
+			"rawpayload": [
+                        {
+				"Name":"Request Body",
+				"Required":"Y",
+                     		"Default":"<eventNotice> <endDate>2012-10-17T04:14:17.699Z</endDate> <eventNoticeKey>2500002</eventNoticeKey> <facilityName>facility name</facilityName> <isoId>654</isoId> <isoName>iso name</isoName> <meterName>meter name</meterName> <noticeEventId>1234</noticeEventId> <noticeMeterId>5678</noticeMeterId> <productTypeId>456</productTypeId> <productTypeName>product name</productTypeName> <programName>program name</programName> <startDate>2012-10-17T04:14:17.699Z</startDate> <zoneId>98765</zoneId> <zoneName>zone name</zoneName> </eventNotice>\n\nor\n\n{\"noticeEventId\": \"1234\", \"noticeMeterId\": \"5678\", \"startDate\": 1350447257699, \"endDate\": 1350447257699, \"facilityName\": \"facility name\", \"isoId\": \"654\", \"isoName\": \"iso name\", \"meterName\": \"meter name\", \"productTypeId\": \"456\", \"productTypeName\": \"product name\", \"programName\": \"program name\", \"zoneId\": \"98765\", \"zoneName\": \"zone name\"}",
+				"Type":"string",
+				"Description":"Representation of Request Body"
+                        }
+			]
+            	},
+		{
+               		"MethodName":"CreateEvent",
+               		"Synopsis":"Create an EventNotice Resource.",
+               		"HTTPMethod":"POST",
+               		"URI":"/eventNotice/",
+               		"RequiresOAuth":"N",
+               		"read-only":false,
+		     	"elements":[ 
+			{
+                     		"Name":"eventNotice",
+                     		"Required":"Y",
+                     		"Default":"eventNotice",
+                     		"Type":"parentElement",
+                     		"Description":"Parent Element of Request Body"
+                        },
+			{
+                     		"Name":"noticeEventId",
+                     		"Required":"Y",
+                     		"Default":"1234",
+                     		"Type":"string",
+                     		"Description":"Probably numeric third party identifier for an event"
+                        },
+			{
+				"Name":"noticeMeterId",
+				"Required":"Y",
+                     		"Default":"5678",
+				"Type":"string",
+				"Description":"Probably numeric third party identifier for a specific meter"
+                        },
+			{
+				"Name":"meterName",
+				"Required":"N",
+                     		"Default":"meter name",
+				"Type":"string",
+				"Description":"Name provided for the meter"
+			},
+			{
+				"Name":"facilityName",
+				"Required":"N",
+                     		"Default":"facility name",
+				"Type":"string",
+				"Description":"Name provided for the associated facility"
+			},
+			{
+				"Name":"isoId",
+				"Required":"N",
+                     		"Default":"654",
+				"Type":"string",
+				"Description":"probably numeric third party identifier for a specific ISO"
+			},
+			{
+				"Name":"isoName",
+				"Required":"N",
+                     		"Default":"iso name",
+				"Type":"string",
+				"Description":"Name provided for the associated ISO"
+			},
+			{
+				"Name":"zoneId",
+				"Required":"N",
+                     		"Default":"98765",
+				"Type":"string",
+				"Description":"probably numeric third party identifier for a specific geographic zone"
+			},
+			{
+				"Name":"zoneName",
+				"Required":"N",
+                     		"Default":"zone name",
+				"Type":"string",
+				"Description":"Name provided for the associated geographic zone"
+			},
+			{
+				"Name":"productTypeId",
+				"Required":"N",
+                     		"Default":"456",
+				"Type":"string",
+				"Description":"probably numeric third party identifier for a specific energy reduction plan"
+			},
+			{
+				"Name":"productTypeName",
+				"Required":"N",
+                     		"Default":"product name",
+				"Type":"string",
+				"Description":"Name provided for the specified energy reduction plan"
+			},
+			{
+				"Name":"programName",
+				"Required":"N",
+                     		"Default":"program name",
+				"Type":"string",
+				"Description":"Name provided for the ISO energy reduction program"
+			},
+			{
+				"Name":"startDate",
+				"Required":"N",
+                     		"Default":"1350447257699",
+				"Type":"Date Time",
+				"Description":"Representation of the GMT time at which the event will start. The format is important here:    XML Format: 2012-10-17T04:14:17.699Z versus JSON Format: 1350447257699"
+			},
+			{
+				"Name":"endDate",
+				"Required":"N",
+                     		"Default":"1350447257699",
+				"Type":"Date Time",
+				"Description":"Representation of the GMT time at which the event will end. The format is important here:    XML Format: 2012-10-17T04:14:17.699Z versus JSON Format: 1350447257699"
+			}
+			],
+			"headers": [ 
+			{ 
+				"Name":"Accept",
+				"Required":"Y",
+				"Default":"application/json",
+				"Type":"enumerated",
+				"Description":"response mime type",
+				"EnumeratedList":[
+					"application/json",
+					"application/xml"
+				]
+			},
+			{ 
+				"Name":"Content-Type",
+				"Required":"Y",
+				"Default":"application/json",
+				"Type":"enumerated",
+				"Description":"request mime type",
+				"EnumeratedList":[
+					"application/json",
+					"application/xml"
+				]
+			}
+			]
+            	},
+		{
+                    	"MethodName": "UpdateEvent",
+                    	"Synopsis": "Updates an Existing EventNotice Resource",
+                    	"HTTPMethod": "PUT",
+                    	"URI": "/eventNotice/event/:eventId/meter/:meterId",
+                    	"RequiresOAuth": "N",
+		    	"read-only":false,
+		    	"parameters":[ 
+			{
+                     		"Name":"eventId",
+                     		"Required":"Y",
+                     		"Default":"1234",
+                     		"Type":"string",
+                     		"Description":"Probably numeric third party identifier for an event"
+                        },
+			{
+				"Name":"meterId",
+				"Required":"Y",
+                     		"Default":"5678",
+				"Type":"string",
+				"Description":"Probably numeric third party identifier for a specific meter"
+			} 
+		     	],
+			"headers": [ 
+			{ 
+				"Name":"Accept",
+				"Required":"Y",
+				"Default":"application/json",
+				"Type":"enumerated",
+				"Description":"response mime type",
+				"EnumeratedList":[
+					"application/json",
+					"application/xml"
+				]
+			},
+			{ 
+				"Name":"Content-Type",
+				"Required":"Y",
+				"Default":"application/json",
+				"Type":"enumerated",
+				"Description":"request mime type",
+				"EnumeratedList":[
+					"application/json",
+					"application/xml"
+				]
+			}
+			],
+			"rawpayload": [
+                        {
+				"Name":"Request Body",
+				"Required":"Y",
+                     		"Default":"<eventNotice> <endDate>2012-10-17T04:14:17.699Z</endDate> <eventNoticeKey>2500002</eventNoticeKey> <facilityName>facility name</facilityName> <isoId>654</isoId> <isoName>iso name</isoName> <meterName>meter name</meterName> <noticeEventId>1234</noticeEventId> <noticeMeterId>5678</noticeMeterId> <productTypeId>456</productTypeId> <productTypeName>product name</productTypeName> <programName>program name</programName> <startDate>2012-10-17T04:14:17.699Z</startDate> <zoneId>98765</zoneId> <zoneName>zone name</zoneName> </eventNotice>  \n\nor\n\n {\"noticeEventId\": \"1234\", \"noticeMeterId\": \"5678\", \"startDate\": 1350447257699, \"endDate\": 1350447257699, \"facilityName\": \"facility name\", \"isoId\": \"654\", \"isoName\": \"iso name\", \"meterName\": \"meter name\", \"productTypeId\": \"456\", \"productTypeName\": \"product name\", \"programName\": \"program name\", \"zoneId\": \"98765\", \"zoneName\": \"zone name\"}",
+				"Type":"string",
+				"Description":"Representation of Request Body"
+                        }
+			]
+		},
+		{
+                    	"MethodName": "UpdateEvent",
+                    	"Synopsis": "Updates an Existing EventNotice Resource",
+                    	"HTTPMethod": "PUT",
+                    	"URI": "/eventNotice/event/:eventId/meter/:meterId",
+                    	"RequiresOAuth": "N",
+		    	"read-only":false,
+		    	"parameters":[ 
+			{
+                     		"Name":"eventId",
+                     		"Required":"Y",
+                     		"Default":"1234",
+                     		"Type":"string",
+                     		"Description":"Probably numeric third party identifier for an event"
+                        },
+			{
+				"Name":"meterId",
+				"Required":"Y",
+                     		"Default":"5678",
+				"Type":"string",
+				"Description":"Probably numeric third party identifier for a specific meter"
+			} 
+		     	],
+		    	"elements":[ 
+			{
+                     		"Name":"eventNotice",
+                     		"Required":"Y",
+                     		"Default":"eventNotice",
+                     		"Type":"parentElement",
+                     		"Description":"Parent Element of Request Body"
+                        },
+			{
+				"Name":"meterName",
+				"Required":"N",
+                     		"Default":"meter name",
+				"Type":"string",
+				"Description":"Name provided for the meter"
+			},
+			{
+				"Name":"facilityName",
+				"Required":"N",
+                     		"Default":"facility name",
+				"Type":"string",
+				"Description":"Name provided for the associated facility"
+			},
+			{
+				"Name":"isoId",
+				"Required":"N",
+                     		"Default":"654",
+				"Type":"string",
+				"Description":"probably numeric third party identifier for a specific ISO"
+			},
+			{
+				"Name":"isoName",
+				"Required":"N",
+                     		"Default":"iso name",
+				"Type":"string",
+				"Description":"Name provided for the associated ISO"
+			},
+			{
+				"Name":"zoneId",
+				"Required":"N",
+                     		"Default":"98765",
+				"Type":"string",
+				"Description":"probably numeric third party identifier for a specific geographic zone"
+			},
+			{
+				"Name":"zoneName",
+				"Required":"N",
+                     		"Default":"zone name",
+				"Type":"string",
+				"Description":"Name provided for the associated geographic zone"
+			},
+			{
+				"Name":"productTypeId",
+				"Required":"N",
+                     		"Default":"456",
+				"Type":"string",
+				"Description":"probably numeric third party identifier for a specific energy reduction plan"
+			},
+			{
+				"Name":"productTypeName",
+				"Required":"N",
+                     		"Default":"product name",
+				"Type":"string",
+				"Description":"Name provided for the specified energy reduction plan"
+			},
+			{
+				"Name":"programName",
+				"Required":"N",
+                     		"Default":"program name",
+				"Type":"string",
+				"Description":"Name provided for the ISO energy reduction program"
+			},
+			{
+				"Name":"startDate",
+				"Required":"N",
+                     		"Default":"1350447257699",
+				"Type":"Date Time",
+				"Description":"Representation of the GMT time at which the event will start. The format is important here:    XML Format: 2012-10-17T04:14:17.699Z versus JSON Format: 1350447257699"
+			},
+			{
+				"Name":"endDate",
+				"Required":"N",
+                     		"Default":"1350447257699",
+				"Type":"Date Time",
+				"Description":"Representation of the GMT time at which the event will end. The format is important here:    XML Format: 2012-10-17T04:14:17.699Z versus JSON Format: 1350447257699"
+			}
+		     	],
+			"headers": [ 
+			{ 
+				"Name":"Accept",
+				"Required":"Y",
+				"Default":"application/json",
+				"Type":"enumerated",
+				"Description":"response mime type",
+				"EnumeratedList":[
+					"application/json",
+					"application/xml"
+				]
+			},
+			{ 
+				"Name":"Content-Type",
+				"Required":"Y",
+				"Default":"application/json",
+				"Type":"enumerated",
+				"Description":"request mime type",
+				"EnumeratedList":[
+					"application/json",
+					"application/xml"
+				]
+			}
+			]
+		}
+            ]
+        }
+    ]
+}
