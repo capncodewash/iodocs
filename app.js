@@ -62,7 +62,7 @@ if (process.env.REDISTOGO_URL) {
 
 db.on("error", function(err) {
     if (config.debug) {
-        console.log("Error " + err);
+         console.log("Error " + err);
     }
 });
 
@@ -70,11 +70,11 @@ db.on("error", function(err) {
 // Load API Configs
 //
 var apisConfig;
-fs.readFile('public/data/apiconfig.json', 'utf-8', function(err, data) {
+fs.readFile(__dirname +'/public/data/apiconfig.json', 'utf-8', function(err, data) {
     if (err) throw err;
     apisConfig = JSON.parse(data);
     if (config.debug) {
-        console.log(util.inspect(apisConfig));
+         console.log(util.inspect(apisConfig));
     }
 });
 
@@ -131,12 +131,12 @@ function oauth(req, res, next) {
             refererURL = url.parse(req.headers.referer),
             callbackURL = refererURL.protocol + '//' + refererURL.host + '/authSuccess/' + apiName,
             oa = new OAuth(apiConfig.oauth.requestURL,
-                apiConfig.oauth.accessURL,
-                apiKey,
-                apiSecret,
-                apiConfig.oauth.version,
-                callbackURL,
-                apiConfig.oauth.crypt);
+                           apiConfig.oauth.accessURL,
+                           apiKey,
+                           apiSecret,
+                           apiConfig.oauth.version,
+                           callbackURL,
+                           apiConfig.oauth.crypt);
 
         if (config.debug) {
             console.log('OAuth type: ' + apiConfig.oauth.type);
@@ -221,9 +221,9 @@ function oauthSuccess(req, res, next) {
             console.log(util.inspect(err));
         }
         oauthRequestToken = result[0],
-            oauthRequestTokenSecret = result[1],
-            apiKey = result[2],
-            apiSecret = result[3];
+        oauthRequestTokenSecret = result[1],
+        apiKey = result[2],
+        apiSecret = result[3];
 
         if (config.debug) {
             console.log(util.inspect(">>"+oauthRequestToken));
@@ -232,12 +232,12 @@ function oauthSuccess(req, res, next) {
         };
 
         var oa = new OAuth(apiConfig.oauth.requestURL,
-            apiConfig.oauth.accessURL,
-            apiKey,
-            apiSecret,
-            apiConfig.oauth.version,
-            null,
-            apiConfig.oauth.crypt);
+                           apiConfig.oauth.accessURL,
+                           apiKey,
+                           apiSecret,
+                           apiConfig.oauth.version,
+                           null,
+                           apiConfig.oauth.crypt);
 
         if (config.debug) {
             console.log(util.inspect(oa));
@@ -285,7 +285,7 @@ function processRequest(req, res, next) {
         apiKey = reqQuery.apiKey,
         apiSecret = reqQuery.apiSecret,
         apiName = reqQuery.apiName
-    apiConfig = apisConfig[apiName],
+        apiConfig = apisConfig[apiName],
         key = req.sessionID + ':' + apiName;
 
     // Extract custom headers from the params
@@ -396,10 +396,10 @@ function processRequest(req, res, next) {
             };
 
             db.mget([key + ':apiKey',
-                key + ':apiSecret',
-                key + ':accessToken',
-                key + ':accessTokenSecret'
-            ],
+                     key + ':apiSecret',
+                     key + ':accessToken',
+                     key + ':accessTokenSecret'
+                ],
                 function(err, results) {
 
                     var apiKey = (typeof reqQuery.apiKey == "undefined" || reqQuery.apiKey == "undefined")?results[0]:reqQuery.apiKey,
@@ -410,14 +410,14 @@ function processRequest(req, res, next) {
                     console.log(apiSecret);
                     console.log(accessToken);
                     console.log(accessTokenSecret);
-
+                    
                     var oa = new OAuth(apiConfig.oauth.requestURL || null,
-                        apiConfig.oauth.accessURL || null,
-                        apiKey || null,
-                        apiSecret || null,
-                        apiConfig.oauth.version || null,
-                        null,
-                        apiConfig.oauth.crypt);
+                                       apiConfig.oauth.accessURL || null,
+                                       apiKey || null,
+                                       apiSecret || null,
+                                       apiConfig.oauth.version || null,
+                                       null,
+                                       apiConfig.oauth.crypt);
 
                     if (config.debug) {
                         console.log('Access token: ' + accessToken);
@@ -457,12 +457,12 @@ function processRequest(req, res, next) {
 
             var body,
                 oa = new OAuth(null,
-                    null,
-                    apiKey || null,
-                    apiSecret || null,
-                    apiConfig.oauth.version || null,
-                    null,
-                    apiConfig.oauth.crypt);
+                               null,
+                               apiKey || null,
+                               apiSecret || null,
+                               apiConfig.oauth.version || null,
+                               null,
+                               apiConfig.oauth.crypt);
 
             var resource = options.protocol + '://' + options.host + options.path,
                 cb = function(error, data, response) {
@@ -576,7 +576,7 @@ function processRequest(req, res, next) {
 
             for (var x = 0, len = reqQuery.headerNames.length; x < len; x++) {
                 if (config.debug) {
-                    console.log('Setting header: ' + reqQuery.headerNames[x] + ':' + reqQuery.headerValues[x]);
+                  console.log('Setting header: ' + reqQuery.headerNames[x] + ':' + reqQuery.headerValues[x]);
                 };
                 if (reqQuery.headerNames[x] != '') {
                     headers[reqQuery.headerNames[x]] = reqQuery.headerValues[x];
@@ -676,17 +676,17 @@ function processRequest(req, res, next) {
                 // Response body
                 req.result = body;
 
-                sconsole.log(util.inspect(body));
+                console.log(util.inspect(body));
 
                 next();
             })
         }).on('error', function(e) {
-                if (config.debug) {
-                    console.log('HEADERS: ' + JSON.stringify(res.headers));
-                    console.log("Got error: " + e.message);
-                    console.log("Error: " + util.inspect(e));
-                };
-            });
+            if (config.debug) {
+                console.log('HEADERS: ' + JSON.stringify(res.headers));
+                console.log("Got error: " + e.message);
+                console.log("Error: " + util.inspect(e));
+            };
+        });
 
         if (requestBody) {
             apiCall.end(requestBody, 'utf-8');
@@ -702,16 +702,16 @@ function processRequest(req, res, next) {
 // Passes variables to the view
 app.dynamicHelpers({
     session: function(req, res) {
-        // If api wasn't passed in as a parameter, check the path to see if it's there
+    // If api wasn't passed in as a parameter, check the path to see if it's there
         if (!req.params.api) {
             pathName = req.url.replace('/','');
             // Is it a valid API - if there's a config file we can assume so
-            fs.stat('public/data/' + pathName + '.json', function (error, stats) {
+            fs.stat(__dirname + '/public/data/' + pathName + '.json', function (error, stats) {
                 if (stats) {
                     req.params.api = pathName;
                 }
             });
-        }
+        }       
         // If the cookie says we're authed for this particular API, set the session to authed as well
         if (req.params.api && req.session[req.params.api] && req.session[req.params.api]['authed']) {
             req.session['authed'] = true;
@@ -733,7 +733,7 @@ app.dynamicHelpers({
     },
     apiDefinition: function(req, res) {
         if (req.params.api) {
-            var data = fs.readFileSync('public/data/' + req.params.api + '.json');
+            var data = fs.readFileSync(__dirname + '/public/data/' + req.params.api + '.json');
             return JSON.parse(data);
         }
     }
@@ -790,8 +790,8 @@ app.get('/authSuccess/:api', oauthSuccess, function(req, res) {
 });
 
 app.post('/upload', function(req, res) {
-    console.log(req.body.user);
-    res.redirect('back');
+  console.log(req.body.user);
+  res.redirect('back');
 });
 
 // API shortname, all lowercase
