@@ -38,5 +38,11 @@
         "protocol": "http",
         "baseURL": "requestb.in",
         "publicPath": "/"
+    },
+    "eventnotification": {
+        "name": "Event Notification (custom request bodies)",
+        "protocol": "http",
+        "baseURL": "localhost",
+        "publicPath": "/"
     }
 }
