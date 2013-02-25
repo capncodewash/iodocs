@@ -588,7 +588,7 @@ function processRequest(req, res, next) {
 
         if (!options.headers['Content-Length']) {
             if (requestBody) {
-                options.headers['Content-Length'] = requestBody.length;
+                options.headers['Content-Length'] = Buffer.byteLength(requestBody, 'utf8');
             }
             else {
                 options.headers['Content-Length'] = 0;
