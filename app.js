@@ -375,7 +375,11 @@ function processRequest(req, res, next) {
                     var elList = {};
                     for (var x = 0, len = reqQuery.elementNames.length; x < len; x++) {
                         if (reqQuery.elementNames[x] != '') {
-                            elList[reqQuery.elementNames[x]] = reqQuery.elementValues[x];
+                            if (reqQuery.elementTypes[x] == 'boolean') {
+                              elList[reqQuery.elementNames[x]] = apiConfig['booleanTrueVal'] == reqQuery.elementValues[x];
+                            } else {
+                              elList[reqQuery.elementNames[x]] = reqQuery.elementValues[x];
+                            }
                         }
                     }
                     requestBody = JSON.stringify(elList);
