@@ -375,10 +375,20 @@ function processRequest(req, res, next) {
                     var elList = {};
                     for (var x = 0, len = reqQuery.elementNames.length; x < len; x++) {
                         if (reqQuery.elementNames[x] != '') {
-                            if (reqQuery.elementTypes[x] == 'boolean') {
-                              elList[reqQuery.elementNames[x]] = apiConfig['booleanTrueVal'] == reqQuery.elementValues[x];
-                            } else {
-                              elList[reqQuery.elementNames[x]] = reqQuery.elementValues[x];
+                            switch (reqQuery.elementTypes[x]) {
+                              case 'boolean' :
+                                elList[reqQuery.elementNames[x]] = apiConfig['booleanTrueVal'] == reqQuery.elementValues[x];
+                                break;
+                              case 'json' :
+                                if (reqQuery.elementValues[x] != '')
+                                  elList[reqQuery.elementNames[x]] = JSON.parse(reqQuery.elementValues[x]);
+                                break;
+                              case 'integer' :
+                                if (reqQuery.elementValues[x] != '')
+                                  elList[reqQuery.elementNames[x]] = parseInt(reqQuery.elementValues[x]);
+                                break;
+                              default:
+                                elList[reqQuery.elementNames[x]] = reqQuery.elementValues[x];
                             }
                         }
                     }
