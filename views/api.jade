@@ -153,6 +153,7 @@ ul
                                               tr(class=className)
                                                   td
                                                       #{element.Name}
+                                                      input(type='hidden', name='elementTypes['+ elCount +']', value=element.Type || 'string')
                                                       - if (element.Type != 'parentElement')
                                                         input(name='elementNames[' + elCount + ']', type='hidden', value=element.Name)
                                                   td.header
